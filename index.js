@@ -29,6 +29,7 @@ async function run() {
 
         const db = client.db("whereIsItDB");
         const itemsCollection = db.collection("items");
+        const recoveredCollection = db.collection("recovered");
 
         //  POST add new item
         app.post("/items", async (req, res) => {
@@ -61,7 +62,19 @@ async function run() {
             res.send(items);
         });
 
-        
+        // GET single item by ID
+        app.get("/items/:id", async (req, res) => {
+            const id = req.params.id;
+            try {
+                const item = await itemsCollection.findOne({ _id: new ObjectId(id) });
+                if (!item) {
+                    return res.status(404).send({ error: "Item not found" });
+                }
+                res.send(item);
+            } catch (err) {
+                res.status(500).send({ error: "Invalid ID format or server error" });
+            }
+        });
 
 
 
