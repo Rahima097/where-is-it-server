@@ -33,16 +33,35 @@ async function run() {
         //  POST add new item
         app.post("/items", async (req, res) => {
             const newItem = req.body;
-            newItem.status = "available"; // default status
+            newItem.status = "available";
             const result = await itemsCollection.insertOne(newItem);
             res.send(result);
         });
 
-        //  GET all items
+        app.post("/items", async (req, res) => {
+            const newItem = req.body;
+            newItem.status = "available";
+            const result = await itemsCollection.insertOne(newItem);
+            res.send(result);
+        });
+
+        // GET all items with optional search filter by title or location
         app.get("/items", async (req, res) => {
-            const items = await itemsCollection.find().toArray();
+            const search = req.query.search || "";
+            const filter = search
+                ? {
+                    $or: [
+                        { title: { $regex: search, $options: "i" } },
+                        { location: { $regex: search, $options: "i" } },
+                    ],
+                }
+                : {};
+
+            const items = await itemsCollection.find(filter).toArray();
             res.send(items);
         });
+
+        
 
 
 
