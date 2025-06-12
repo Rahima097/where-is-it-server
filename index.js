@@ -128,13 +128,29 @@ async function run() {
             // Normalize email to lowercase
             userEmail = userEmail.toLowerCase();
             try {
+
                 const userItems = await itemsCollection.find({ contactEmail: userEmail }).toArray();
                 res.send(userItems);
             } catch (error) {
                 res.status(500).send({ error: 'Failed to fetch user items' });
             }
         });
+        
+         // DELETE item by ID
+        app.delete('/items/:id', async (req, res) => {
+            const id = req.params.id;
+            try {
+                const result = await itemsCollection.deleteOne({ _id: new ObjectId(id) });
+                if (result.deletedCount === 0) {
+                    return res.status(404).send({ error: 'Item not found' });
+                }
+                res.send({ deletedCount: result.deletedCount });
+            } catch (error) {
+                res.status(500).send({ error: 'Failed to delete item' });
+            }
+        });
 
+        
        
 
 
