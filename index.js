@@ -135,8 +135,8 @@ async function run() {
                 res.status(500).send({ error: 'Failed to fetch user items' });
             }
         });
-        
-         // DELETE item by ID
+
+        // DELETE item by ID
         app.delete('/items/:id', async (req, res) => {
             const id = req.params.id;
             try {
@@ -150,8 +150,68 @@ async function run() {
             }
         });
 
+        // PATCH: Update item details partially (accept same fields as PUT)
+        app.patch("/items/:id", async (req, res) => {
+            const id = req.params.id;
+            const allowedUpdates = ["postType", "image", "thumbnail", "title", "description", "category", "location", "date", "contactInfo"];
+
+            const updates = {};
+            allowedUpdates.forEach(field => {
+                if (field in req.body) {
+                    updates[field === "image" ? "thumbnail" : field] = req.body[field];
+                }
+            });
+
+            try {
+                const result = await itemsCollection.updateOne(
+                    { _id: new ObjectId(id) },
+                    { $set: updates }
+                );
+                if (result.matchedCount === 0) {
+                    return res.status(404).send({ success: false, message: "Item not found." });
+                }
+                if (result.modifiedCount === 0) {
+                    return res.status(200).send({ success: true, message: "No changes made." });
+                }
+                res.status(200).send({ success: true, message: "Item updated successfully." });
+            } catch (error) {
+                console.error(error);
+                res.status(500).send({ success: false, message: "Server error." });
+            }
+        });
+
+        // PUT: Update item details fully
+        app.put("/items/:id", async (req, res) => {
+            const id = req.params.id;
+            const allowedUpdates = ["postType", "image", "thumbnail", "title", "description", "category", "location", "date", "contactInfo"];
+
+            const updates = {};
+            allowedUpdates.forEach(field => {
+                if (field in req.body) {
+                    updates[field === "image" ? "thumbnail" : field] = req.body[field];
+                }
+            });
+
+            try {
+                const result = await itemsCollection.updateOne(
+                    { _id: new ObjectId(id) },
+                    { $set: updates }
+                );
+                if (result.matchedCount === 0) {
+                    return res.status(404).send({ success: false, message: "Item not found." });
+                }
+                if (result.modifiedCount === 0) {
+                    return res.status(200).send({ success: true, message: "No changes made." });
+                }
+                res.status(200).send({ success: true, message: "Item updated successfully." });
+            } catch (error) {
+                console.error(error);
+                res.status(500).send({ success: false, message: "Server error." });
+            }
+        });
+
         
-       
+
 
 
 
