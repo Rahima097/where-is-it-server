@@ -39,13 +39,6 @@ async function run() {
             res.send(result);
         });
 
-        app.post("/items", async (req, res) => {
-            const newItem = req.body;
-            newItem.status = "available";
-            const result = await itemsCollection.insertOne(newItem);
-            res.send(result);
-        });
-
         // GET all items with optional search filter by title or location
         app.get("/items", async (req, res) => {
             const search = req.query.search || "";
@@ -125,6 +118,24 @@ async function run() {
                 res.status(500).send({ error: "Server error during recovery" });
             }
         });
+
+        // GET items created by a specific user (filter by user email)
+        app.get('/myItems', async (req, res) => {
+            let userEmail = req.query.email;
+            if (!userEmail) {
+                return res.status(400).send({ error: 'User email is required' });
+            }
+            // Normalize email to lowercase
+            userEmail = userEmail.toLowerCase();
+            try {
+                const userItems = await itemsCollection.find({ contactEmail: userEmail }).toArray();
+                res.send(userItems);
+            } catch (error) {
+                res.status(500).send({ error: 'Failed to fetch user items' });
+            }
+        });
+
+       
 
 
 
