@@ -94,11 +94,14 @@ async function run() {
         app.post("/recovered", async (req, res) => {
             try {
                 const recoveryData = req.body;
-                const { itemId, recoveredDate, recoveredLocation } = recoveryData;
+                const { itemId, recoveredDate, recoveredLocation, recoveredBy } = recoveryData;
 
-                if (!itemId || !recoveredLocation || !recoveredDate) {
+                if (!itemId || !recoveredLocation || !recoveredDate || !recoveredBy) {
                     return res.status(400).send({ error: "Missing required recovery fields" });
                 }
+
+                // Add contactEmail for consistent filtering
+                recoveryData.contactEmail = recoveredBy.email.toLowerCase();
 
                 const item = await itemsCollection.findOne({ _id: new ObjectId(itemId) });
 
@@ -112,7 +115,12 @@ async function run() {
                     { $set: { status: "recovered" } }
                 );
 
-                res.send({ message: "Item marked as recovered", result: recoveryResult, updated: updateResult });
+                // Send clear response
+                res.send({
+                    message: "Item marked as recovered",
+                    recoveryId: recoveryResult.insertedId,
+                    updatedCount: updateResult.modifiedCount,
+                });
             } catch (error) {
                 console.error(error);
                 res.status(500).send({ error: "Server error during recovery" });
@@ -210,7 +218,21 @@ async function run() {
             }
         });
 
-        
+        // get all recoverd
+
+        app.get("/recovered", async (req, res) => {
+            try {
+                const userEmail = req.query.email;
+                if (!userEmail) {
+                    return res.status(400).send({ error: "User email is required" });
+                }
+                const emailLower = userEmail.toLowerCase();
+                const recoveredItems = await recoveredCollection.find({ contactEmail: emailLower }).toArray();
+                res.send(recoveredItems);
+            } catch (error) {
+                res.status(500).send({ error: "Failed to fetch recovered items" });
+            }
+        });
 
 
 
