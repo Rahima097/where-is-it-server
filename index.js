@@ -1,4 +1,5 @@
 require('dotenv').config();
+
 const express = require('express')
 const cors = require('cors')
 const app = express();
@@ -45,7 +46,7 @@ const verifyFireBaseToken = async (req, res, next) => {
 
     try {
         const decoded = await admin.auth().verifyIdToken(token);
-        console.log('decoded token', decoded);
+        // console.log('decoded token', decoded);
         req.decoded = decoded;
         next();
     }
@@ -67,7 +68,7 @@ async function run() {
         //  POST add new item
         app.post("/items", verifyFireBaseToken, async (req, res) => {
             const newItem = req.body;
-            newItem.status = "available";
+            newItem.status = "Searching";
 
             if (req.decoded.email !== newItem.contactEmail) {
                 return res.status(403).send({ message: 'forbidden access' });
@@ -159,10 +160,6 @@ async function run() {
 
                 if (!item) {
                     return res.status(404).send({ error: "Item not found" });
-                }
-
-                if (item.contactEmail !== req.decoded.email) {
-                    return res.status(403).send({ message: 'forbidden access' });
                 }
 
                 if (item.status === "recovered") {
@@ -321,6 +318,7 @@ async function run() {
         // Send a ping to confirm a successful connection
         // await client.db("admin").command({ ping: 1 });
         // console.log("Pinged your deployment. You successfully connected to MongoDB!");
+
     } finally {
         // Ensures that the client will close when you finish/error
         // await client.close();
