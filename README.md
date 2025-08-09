@@ -1,4 +1,3 @@
-﻿# b11a11-server-side-Rahima097
 # WhereIsIt - Lost & Found Platform
 
 ## Purpose
@@ -89,6 +88,7 @@ To create a community-driven platform that helps people reunite with their lost 
 - **CORS** - Cross-origin resource sharing
 - **dotenv** - Environment variable management
 - **JWT** - firebase-admin
+
 
 
 
